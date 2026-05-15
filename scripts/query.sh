@@ -1,0 +1,1 @@
+echo '{"execute":"query-status"}' | nc -U /tmp/vm1-managed.qmp
