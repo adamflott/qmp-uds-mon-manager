@@ -15,6 +15,10 @@ the response is returned to the client that made the request.
 The project also exposes an HTTP API over a Unix domain socket for registration,
 introspection, removal, and raw QMP passthrough.
 
+AI disclosure: This project was guided by me, but 99% coded by OpenAI Codex GPT-5.5. 
+I've reviewed the output and attest that had I built this by hand, I would have
+implemented it the same way.
+
 ## Features
 
 - Manages multiple QEMU instances.
