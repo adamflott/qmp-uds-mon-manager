@@ -1,12 +1,12 @@
 //! Direct QEMU QMP concurrency demo.
 //!
-//! This binary intentionally bypasses qmp-manager. It starts many independent
+//! This binary intentionally bypasses qmp-uds-mon-manager. It starts many independent
 //! QMP clients against one real QEMU monitor socket and sends the same command
 //! from each client.
 //!
 //! The expected contrast is with `qmp-parallel`: direct concurrent access to a
 //! QEMU QMP socket can fail or time out because the monitor is a single protocol
-//! stream, while qmp-manager gives clients a QMP-looking socket and serializes
+//! stream, while qmp-uds-mon-manager gives clients a QMP-looking socket and serializes
 //! backend access.
 
 use std::{io, path::PathBuf, time::Duration, time::Instant};

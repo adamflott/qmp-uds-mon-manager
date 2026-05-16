@@ -1,6 +1,6 @@
-//! Demonstration client for qmp-manager's client-facing QMP socket.
+//! Demonstration client for qmp-uds-mon-manager's client-facing QMP socket.
 //!
-//! The program registers one or more VMs through qmp-manager's HTTP-over-UDS
+//! The program registers one or more VMs through qmp-uds-mon-manager's HTTP-over-UDS
 //! API, then starts many independent QMP clients per VM. Clients for a given VM
 //! all connect to that VM's manager-owned `client_socket`. Each client performs
 //! the normal QMP greeting and capability handshake before sending the same
@@ -8,7 +8,7 @@
 //!
 //! This is intentionally a small protocol-level client instead of a benchmark
 //! harness. Its purpose is to show that concurrent clients can use one
-//! QMP-looking socket while qmp-manager serializes backend access to each QEMU.
+//! QMP-looking socket while qmp-uds-mon-manager serializes backend access to each QEMU.
 
 use std::{io, path::PathBuf, time::Instant};
 
@@ -64,7 +64,7 @@ async fn run() -> Result<(), String> {
                 vm_id = %vm.id,
                 manager_socket = %config.manager_socket.display(),
                 %error,
-                "failed to register VM with qmp-manager"
+                "failed to register VM with qmp-uds-mon-manager"
             );
             registration_errors.push(format!("{}: {error}", vm.id));
             continue;
@@ -75,7 +75,7 @@ async fn run() -> Result<(), String> {
             vm_id = %vm.id,
             qmp_socket = %vm.qmp_socket.display(),
             client_socket = %vm.client_socket.display(),
-            "registered VM with qmp-manager"
+            "registered VM with qmp-uds-mon-manager"
         );
     }
 
@@ -196,7 +196,7 @@ async fn cleanup_registered_vms(
     let mut cleanup_errors = Vec::new();
     for vm in registered_vms.iter().rev() {
         match unregister_vm(manager_socket, vm).await {
-            Ok(()) => info!(vm_id = %vm.id, "unregistered VM from qmp-manager"),
+            Ok(()) => info!(vm_id = %vm.id, "unregistered VM from qmp-uds-mon-manager"),
             Err(error) => {
                 warn!(vm_id = %vm.id, %error, "failed to unregister VM");
                 cleanup_errors.push(format!("{}: {error}", vm.id));
@@ -206,7 +206,7 @@ async fn cleanup_registered_vms(
     cleanup_errors
 }
 
-/// Register the demo VM using qmp-manager's HTTP management API.
+/// Register the demo VM using qmp-uds-mon-manager's HTTP management API.
 async fn register_vm(manager_socket: &PathBuf, vm: &VmConfig) -> Result<(), io::Error> {
     debug!(vm_id = %vm.id, "sending VM registration request");
     let body = serde_json::to_vec(&json!({
@@ -244,7 +244,7 @@ async fn run_qmp_client(client_socket: &PathBuf, command: Value) -> Result<Strin
     let mut stream = BufReader::new(stream);
     debug!(client_socket = %client_socket.display(), "connected to client-facing QMP socket");
 
-    // qmp-manager replays QEMU's greeting so normal QMP clients can start the
+    // qmp-uds-mon-manager replays QEMU's greeting so normal QMP clients can start the
     // same way they would when connected directly to QEMU.
     let greeting = read_json_line(&mut stream).await?;
     if greeting.get("QMP").is_none() {
@@ -255,7 +255,7 @@ async fn run_qmp_client(client_socket: &PathBuf, command: Value) -> Result<Strin
     }
     debug!("received QMP greeting");
 
-    // The front-side handshake is per client and is answered by qmp-manager.
+    // The front-side handshake is per client and is answered by qmp-uds-mon-manager.
     // The backend QEMU connection was already negotiated during registration.
     write_json_line(stream.get_mut(), &json!({ "execute": "qmp_capabilities" })).await?;
     let capabilities = read_json_line(&mut stream).await?;
@@ -303,7 +303,7 @@ async fn run_qmp_client(client_socket: &PathBuf, command: Value) -> Result<Strin
     }
 }
 
-/// Send a minimal HTTP/1.1 request over qmp-manager's Unix socket.
+/// Send a minimal HTTP/1.1 request over qmp-uds-mon-manager's Unix socket.
 async fn send_http_request(
     manager_socket: &PathBuf,
     request_line: &str,
@@ -319,7 +319,7 @@ async fn send_http_request(
     );
     let request = format!(
         "{request_line}\r\n\
-         Host: qmp-manager\r\n\
+         Host: qmp-uds-mon-manager\r\n\
          Content-Type: application/json\r\n\
          Content-Length: {}\r\n\
          Connection: close\r\n\
@@ -384,7 +384,7 @@ async fn write_json_line(stream: &mut UnixStream, value: &Value) -> Result<(), i
 #[derive(Debug, Parser)]
 #[command(author, version, about)]
 struct CliArgs {
-    /// qmp-manager HTTP management Unix socket.
+    /// qmp-uds-mon-manager HTTP management Unix socket.
     #[arg(short = 'm', long, value_name = "MANAGER_SOCKET")]
     manager_socket: PathBuf,
 
@@ -396,11 +396,11 @@ struct CliArgs {
     #[arg(short = 'q', long, value_name = "QEMU_QMP_SOCKET_TEMPLATE")]
     qmp_socket_template: String,
 
-    /// qmp-manager client-facing socket path or template. Multi-VM runs require `{i}`.
+    /// qmp-uds-mon-manager client-facing socket path or template. Multi-VM runs require `{i}`.
     #[arg(short = 's', long, value_name = "CLIENT_SOCKET_TEMPLATE")]
     client_socket_template: String,
 
-    /// Ask qmp-manager to move the real QEMU socket aside and serve clients at the original path.
+    /// Ask qmp-uds-mon-manager to move the real QEMU socket aside and serve clients at the original path.
     #[arg(long)]
     move_qmp_socket: bool,
 

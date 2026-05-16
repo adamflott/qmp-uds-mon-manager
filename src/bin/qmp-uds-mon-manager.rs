@@ -242,7 +242,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 /// `RUST_LOG` controls verbosity. Without it, qmp-uds-mon-manager logs at `info`.
 fn init_tracing() {
     let filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("qmp_manager=info"));
+        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("qmp_uds_mon_manager=info"));
 
     fmt()
         .with_env_filter(filter)

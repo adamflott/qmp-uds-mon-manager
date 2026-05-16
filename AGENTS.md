@@ -11,10 +11,10 @@ sockets.
 Important files:
 
 - `src/bin/qmp-uds-mon-manager.rs`: main daemon.
-- `src/bin/qmp-parallel.rs`: qmp-manager-mediated concurrency demo.
+- `src/bin/qmp-parallel.rs`: qmp-uds-mon-manager-mediated concurrency demo.
 - `src/bin/qmp-direct.rs`: direct-to-QEMU comparison demo.
 - `scripts/demo.sh`: end-to-end demo that starts QEMU, compares direct access,
-  then uses qmp-manager with transparent socket takeover.
+  then uses qmp-uds-mon-manager with transparent socket takeover.
 - `scripts/register.sh`, `scripts/query.sh`, `scripts/unregister.sh`: small
   manual helper scripts.
 - `README.md`: user-facing documentation. Keep examples synchronized with CLI
