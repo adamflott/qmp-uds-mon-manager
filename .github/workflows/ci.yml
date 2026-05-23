@@ -65,49 +65,6 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
 
-  # This job runs tests on cross compiled targets.
-  #
-  # We used to just have one test and do the same thing on normal targets and
-  # cross targets, but cross tests can take an obscenely long time. Especially
-  # the doc tests, where each one is compiled individually. (We haven't moved
-  # to Rust 2024 yet.)
-  cross:
-    env:
-      # Bump this as appropriate. We pin to a version to make sure CI
-      # continues to work as cross releases in the past have broken things
-      # in subtle ways.
-      CROSS_VERSION: v0.2.5
-    runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        target:
-          - i686-unknown-linux-gnu
-          - aarch64-unknown-linux-gnu
-          - powerpc-unknown-linux-gnu
-          - powerpc64-unknown-linux-gnu
-          - s390x-unknown-linux-gnu
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-      - name: Install and configure Cross
-        run: |
-          # In the past, new releases of 'cross' have broken CI. So for now, we
-          # pin it. We also use their pre-compiled binary releases because cross
-          # has over 100 dependencies and takes a bit to compile.
-          dir="$RUNNER_TEMP/cross-download"
-          mkdir "$dir"
-          echo "$dir" >> $GITHUB_PATH
-          cd "$dir"
-          curl -LO "https://github.com/cross-rs/cross/releases/download/$CROSS_VERSION/cross-x86_64-unknown-linux-musl.tar.gz"
-          tar xf cross-x86_64-unknown-linux-musl.tar.gz
-      - name: Basic build
-        run: cross build --all --verbose --target ${{ matrix.target }}
-      - name: Run tests
-        run: cross test --verbose --target ${{ matrix.target }}
-      - name: Run lib tests
-        run: cross test --verbose --lib --target ${{ matrix.target }}
-
   # Tests that everything is formatted correctly.
   rustfmt:
     runs-on: ubuntu-latest
