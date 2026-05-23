@@ -241,8 +241,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 ///
 /// `RUST_LOG` controls verbosity. Without it, qmp-uds-mon-manager logs at `info`.
 fn init_tracing() {
-    let filter =
-        EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("qmp_uds_mon_manager=info"));
+    let filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("qmp_uds_mon_manager=info"));
 
     fmt()
         .with_env_filter(filter)
@@ -355,14 +355,15 @@ async fn register_vm(
         Ok(handle) => handle,
         Err(error) => {
             if let Some(move_info) = &socket_move
-                && let Err(restore_error) = restore_moved_qmp_socket(move_info) {
-                    error!(
-                        ?restore_error,
-                        original = %move_info.original.display(),
-                        backend = %move_info.backend.display(),
-                        "failed to restore QMP socket after registration failure"
-                    );
-                }
+                && let Err(restore_error) = restore_moved_qmp_socket(move_info)
+            {
+                error!(
+                    ?restore_error,
+                    original = %move_info.original.display(),
+                    backend = %move_info.backend.display(),
+                    "failed to restore QMP socket after registration failure"
+                );
+            }
             return Err(error.into());
         }
     };
