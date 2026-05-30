@@ -16,7 +16,7 @@ keywords = ["qemu"]
 [dependencies]
 axum = "0.8.9"
 clap = { version = "4.6.1", features = ["derive"] }
-hyper = "1.9.0"
+hyper = "1.10.1"
 hyper-util = { version = "0.1.20", features = ["server", "http1", "http2", "tokio"] }
 qapi = { version = "0.15.0", features = ["qmp"] }
 serde = { version = "1.0.228", features = ["derive"] }
